@@ -19,13 +19,12 @@ import kotlinx.coroutines.launch
 fun ScreenUser() {
     val context = LocalContext.current
     var db: UserDatabase
-    var id        by remember { mutableStateOf("") }
+    var id by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
-    var lastName  by remember { mutableStateOf("") }
-    var dataUser  = remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var dataUser = remember { mutableStateOf("") }
 
     db = crearDatabase(context)
-
     val dao = db.userDao()
 
     val coroutineScope = rememberCoroutineScope()
@@ -34,7 +33,7 @@ fun ScreenUser() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-    ){
+    ) {
         Spacer(Modifier.height(50.dp))
         TextField(
             value = id,
@@ -57,7 +56,7 @@ fun ScreenUser() {
         )
         Button(
             onClick = {
-                val user = User(0,firstName, lastName)
+                val user = User(0, firstName, lastName)
                 coroutineScope.launch {
                     AgregarUsuario(user = user, dao = dao)
                 }
@@ -65,19 +64,33 @@ fun ScreenUser() {
                 lastName = ""
             }
         ) {
-            Text("Agregar Usuario", fontSize=16.sp)
+            Text("Agregar Usuario", fontSize = 16.sp)
         }
         Button(
             onClick = {
-                val user = User(0,firstName, lastName)
+                val user = User(0, firstName, lastName)
                 coroutineScope.launch {
-                    val data = getUsers( dao = dao)
+                    val data = getUsers(dao = dao)
                     dataUser.value = data
                 }
             }
         ) {
-            Text("Listar Usuarios", fontSize=16.sp)
+            Text("Listar Usuarios", fontSize = 16.sp)
         }
+
+        // Agregar un botón para eliminar el último usuario
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    dao.deleteLastUser()  // Elimina el último usuario
+                    val data = getUsers(dao = dao)
+                    dataUser.value = data
+                }
+            }
+        ) {
+            Text("Eliminar Último Usuario", fontSize = 16.sp)
+        }
+
         Text(
             text = dataUser.value, fontSize = 20.sp
         )
